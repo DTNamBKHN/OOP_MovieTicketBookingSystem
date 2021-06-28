@@ -7,10 +7,15 @@ public class Movie {
 	private int id;
 	private String name;
 	private Date releaseDate;
+	private static int nextID = 0;
 	
-	public Movie(int id, String name, String releaseDate) {
-		super();
-		this.id = id;
+	
+	public Movie() {
+		id = nextID++;
+	}
+	
+	public Movie(String name, String releaseDate) {
+		this();
 		this.name = name;
 		SimpleDateFormat formatter=new SimpleDateFormat("dd-M-yyyy hh:mm:ss");  
 		Date date;
@@ -21,10 +26,6 @@ public class Movie {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	public Movie() {
-		super();
 	}
 
 	public int getId() {
