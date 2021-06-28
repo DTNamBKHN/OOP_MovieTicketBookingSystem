@@ -21,33 +21,11 @@ public class TicketBookingEX {
 		ticketList = new ArrayList<Ticket>();
 		invoiceList = new ArrayList<Invoice>();
 		
-//		if (TicketBookingEX.readMovieFile() == true)
-//			System.out.println("read movie file successfully");
-//		else
-//			System.out.println("Failed in reading movie file");
-//		TicketBookingEX.showMovieData();
-		
-//		if (TicketBookingEX.readTicketFile() == true)
-//			System.out.println("read ticket file successfully");
-//		else
-//			System.out.println("Failed in reading ticket file");
-//		
-//		TicketBookingEX.showTicketData();
-//		Movie movie = new Movie("Batman", "15-6-2021 20:59:26");
-//		Ticket ticket = new Ticket(movie, 600);
-//		ticketList.add(ticket);
-//		TicketBookingEX.showTicketData();
-//		TicketBookingEX.saveTicketFile();
-		
-//		Movie movie = new Movie("Spider Man", "13-4-2021 20:59:26");
-//		movieList.add(movie);
-//		TicketBookingEX.showMovieData();
-//		TicketBookingEX.saveMovieFile();
+
 		TicketBookingEX.readMovieFile();
 		TicketBookingEX.readTicketFile();
 		while(true)
 			TicketBookingEX.menu();
-		
 	}
 	
 	public static void menu() {
@@ -77,22 +55,22 @@ public class TicketBookingEX {
 			break;
 		case 3:
 			TicketBookingEX.showMovieData();
-			TicketBookingEX.removeMoviesList(null);
+			TicketBookingEX.removeMoviesList();
 			TicketBookingEX.showMovieData();
 			break;
 		case 4: 
 			TicketBookingEX.showTicketData();
-			TicketBookingEX.addTicketsList(null);
+			TicketBookingEX.addTicketsList();
 			TicketBookingEX.showTicketData();
 			break;
 		case 5:
 			TicketBookingEX.showTicketData();
-			TicketBookingEX.editTicketsList(null);
+			TicketBookingEX.editTicketsList();
 			TicketBookingEX.showTicketData();
 			break;
 		case 6:
 			TicketBookingEX.showTicketData();
-			TicketBookingEX.removeTicketsList(null);
+			TicketBookingEX.removeTicketsList();
 			TicketBookingEX.showTicketData();
 			break;
 		case 7:
@@ -269,21 +247,21 @@ public class TicketBookingEX {
 		sc.nextLine();
 		String choice = sc.nextLine();
 		if (choice.equals("y")) {
-			System.out.println("Enter movie name: ");
+			System.out.println("Enter new movie name: ");
 			String name = sc.nextLine();
 			movie.setName(name);
 		}
 		System.out.println("Want to edit release date time? (y/n)");
 		String choice2 = sc.nextLine();
 		if (choice2.equals("y")) {
-			System.out.println("Enter release date time: ");
+			System.out.println("Enter new release date time: ");
 			String date = sc.nextLine();
 			movie.setReleaseDate(date);
 		}
 		TicketBookingEX.saveMovieFile();
 	}
 	
-	public static void removeMoviesList(Movie movie) {
+	public static void removeMoviesList() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter index: ");
 		int index = sc.nextInt();
@@ -291,15 +269,49 @@ public class TicketBookingEX {
 		TicketBookingEX.saveMovieFile();
 	}
 	
-	public static void addTicketsList(Ticket ticket) {
-		
+	public static void addTicketsList() {
+		Movie findMovie = new Movie();
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Enter movie name: ");
+		String name = sc.nextLine();
+		boolean checkExist = false;
+		for (int i = 0; i < movieList.size(); i++) {
+			if (movieList.get(i).getName().equals(name)) {
+				checkExist = true;
+				findMovie = movieList.get(i);
+				break;
+			}
+		}
+		if (checkExist == false) {
+			System.out.println("Can't add ticket because there is no movie has name " + name);
+		}
+		else {
+			System.out.println("Enter price: ");
+			Double price = sc.nextDouble();
+			Ticket ticket = new Ticket(findMovie, price);
+			ticketList.add(ticket);
+			TicketBookingEX.saveTicketFile();
+		}
 	}
 	
-	public static void editTicketsList(Ticket ticket) {
-		
+	public static void editTicketsList() {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Enter index: ");
+		int index = sc.nextInt();
+		Ticket ticket = ticketList.get(index);
+		System.out.println("Enter new price: ");
+		Double price = sc.nextDouble();
+		ticket.setPrice(price);
+		TicketBookingEX.saveTicketFile();
 	}
 	
-	public static void removeTicketsList(Ticket ticket) {
-		
+	public static void removeTicketsList() {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Enter index: ");
+		int index = sc.nextInt();
+		ticketList.remove(index);
+		TicketBookingEX.saveTicketFile();
 	}
+	
+	public static void
 }
