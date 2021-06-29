@@ -13,21 +13,30 @@ import java.util.Scanner;
 public class TicketBookingEX {
 	public static ArrayList<Movie> movieList;
 	public static ArrayList<Ticket> ticketList;
-	public static ArrayList<Invoice> invoiceList;
+	public static Invoice invoice;
 	public static ArrayList<Customer> customerList;
+	public static Customer customer = new Customer();
+
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		movieList = new ArrayList<Movie>();
 		ticketList = new ArrayList<Ticket>();
-		invoiceList = new ArrayList<Invoice>();
-		
+		invoice = new Invoice();
 
 		TicketBookingEX.readMovieFile();
 		TicketBookingEX.readTicketFile();
-		while(true)
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Enter your name: ");
+		String customerName = sc.nextLine();
+		System.out.println("Enter your phone number: ");
+		String phoneNumber = sc.nextLine();
+		customer.setName(customerName);
+		customer.setPhoneNumber(phoneNumber);
+
+		while (true)
 			TicketBookingEX.menu();
 	}
-	
+
 	public static void menu() {
 		System.out.println("1. Add a movie");
 		System.out.println("2. Edit a movie");
@@ -41,9 +50,8 @@ public class TicketBookingEX {
 		System.out.println("*************************************");
 		System.out.print("Your choice: ");
 		int choice = new Scanner(System.in).nextInt();
-		switch(choice)
-		{
-		case 1: 
+		switch (choice) {
+		case 1:
 			TicketBookingEX.showMovieData();
 			TicketBookingEX.addMoviesList();
 			TicketBookingEX.showMovieData();
@@ -58,7 +66,7 @@ public class TicketBookingEX {
 			TicketBookingEX.removeMoviesList();
 			TicketBookingEX.showMovieData();
 			break;
-		case 4: 
+		case 4:
 			TicketBookingEX.showTicketData();
 			TicketBookingEX.addTicketsList();
 			TicketBookingEX.showTicketData();
@@ -74,159 +82,185 @@ public class TicketBookingEX {
 			TicketBookingEX.showTicketData();
 			break;
 		case 7:
+			customer.searchATicketByMovieName(ticketList);
 			break;
 		case 8:
+			customer.bookATicket(invoice, ticketList);
 			break;
 		case 9:
+			TicketBookingEX.saveInvoiceFile();
 			System.err.println("Bye!!!");
 			System.exit(0);
 			break;
 		}
 	}
-	
+
+	public static boolean saveInvoiceFile() {
+		try {
+			FileWriter writer = new FileWriter("invoice.txt", true);
+			BufferedWriter bufferedWriter = new BufferedWriter(writer);
+			bufferedWriter.write(invoice.getCustomerName() + "-(");
+			for (Ticket ticket : invoice.getTicketList()) {
+				bufferedWriter.write(ticket.getMovie().getName() + ",");
+			}
+			bufferedWriter.write(")-");
+//			int price = (int) invoice.getTotalPrice();
+			String price = String.valueOf(invoice.getTotalPrice());  
+			System.out.println("Price: " + price);
+			bufferedWriter.write(price);
+			bufferedWriter.newLine();
+
+			bufferedWriter.close();
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 	public static void showTicketData() {
 		for (int i = 0; i < ticketList.size(); i++) {
-			System.out.println(ticketList.get(i).getId()+"-"+ticketList.get(i).getMovie().getName()+"-"+ticketList.get(i).getPrice());
+			System.out.println(ticketList.get(i).getId() + "-" + ticketList.get(i).getMovie().getName() + "-"
+					+ ticketList.get(i).getPrice());
 		}
 		System.out.println("********************************************");
 	}
-	
+
 	public static boolean saveTicketFile() {
-		DateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");  
+		DateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
 		String strDate = new String();
 		try {
-            FileWriter writer = new FileWriter("ticket.txt");
-            BufferedWriter bufferedWriter = new BufferedWriter(writer);
-            for (Ticket ticket: ticketList) {
-				strDate = dateFormat.format(ticket.getMovie().getReleaseDate());  
-				bufferedWriter.write(ticket.getId()+"@"+ticket.getMovie().getId()+"@"+ticket.getMovie().getName()+"@"+strDate+"@"+ticket.getPrice());
-	            bufferedWriter.newLine();
+			FileWriter writer = new FileWriter("ticket.txt");
+			BufferedWriter bufferedWriter = new BufferedWriter(writer);
+			for (Ticket ticket : ticketList) {
+				strDate = dateFormat.format(ticket.getMovie().getReleaseDate());
+				bufferedWriter.write(ticket.getId() + "@" + ticket.getMovie().getId() + "@"
+						+ ticket.getMovie().getName() + "@" + strDate + "@" + ticket.getPrice());
+				bufferedWriter.newLine();
 			}
-            
-            bufferedWriter.close();
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+			bufferedWriter.close();
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
-	
-	public static boolean readTicketFile(){
-		
-		SimpleDateFormat formatter=new SimpleDateFormat("dd-M-yyyy hh:mm:ss");  
+
+	public static boolean readTicketFile() {
+
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
 		try {
-            FileReader reader = new FileReader("ticket.txt");
-            BufferedReader bufferedReader = new BufferedReader(reader);
- 
-            String line;
-            
-            while ((line = bufferedReader.readLine()) != null) {
-            	Ticket ticket = new Ticket();
-            	Movie movie = new Movie();
-            	String[] arrOfStr = line.split("@", 5);
-            	  
-                for (int i = 0; i < arrOfStr.length; i++) {
-                	if (i == 0) {
-                		continue;
-                	}
-                	else if (i == 1)
-                		movie.setId(Integer.parseInt(arrOfStr[i]));
-                	else if (i == 2)
-                		movie.setName(arrOfStr[i]);
-                	else if (i == 3) {
-                		Date date = formatter.parse(arrOfStr[i]);
-                		movie.setReleaseDate(date);
-                	}
-                	else {
-                		ticket.setPrice(Double.parseDouble(arrOfStr[i]));
-                	}
-                }
-                ticket.setMovie(movie);
-                ticketList.add(ticket);
-            }
-            bufferedReader.close();
-            reader.close();
-            return true;
- 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+			FileReader reader = new FileReader("ticket.txt");
+			BufferedReader bufferedReader = new BufferedReader(reader);
+
+			String line;
+
+			while ((line = bufferedReader.readLine()) != null) {
+				Ticket ticket = new Ticket();
+				Movie movie = new Movie();
+				String[] arrOfStr = line.split("@", 5);
+
+				for (int i = 0; i < arrOfStr.length; i++) {
+					if (i == 0) {
+						continue;
+					} else if (i == 1)
+						movie.setId(Integer.parseInt(arrOfStr[i]));
+					else if (i == 2)
+						movie.setName(arrOfStr[i]);
+					else if (i == 3) {
+						Date date = formatter.parse(arrOfStr[i]);
+						movie.setReleaseDate(date);
+					} else {
+						ticket.setPrice(Double.parseDouble(arrOfStr[i]));
+					}
+				}
+				ticket.setMovie(movie);
+				ticketList.add(ticket);
+			}
+			bufferedReader.close();
+			reader.close();
+			return true;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
 	}
-	
+
 	public static void showMovieData() {
-		DateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");  
+		DateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
 		String strDate = new String();
 		for (int i = 0; i < movieList.size(); i++) {
-			strDate = dateFormat.format(movieList.get(i).getReleaseDate()); 
-			System.out.println(movieList.get(i).getId()+"-"+movieList.get(i).getName()+"-"+strDate);
+			strDate = dateFormat.format(movieList.get(i).getReleaseDate());
+			System.out.println(movieList.get(i).getId() + "-" + movieList.get(i).getName() + "-" + strDate);
 		}
 		System.out.println("********************************************");
 	}
-	
+
 	public static boolean saveMovieFile() {
-		DateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");  
+		DateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
 		String strDate = new String();
 		try {
-            FileWriter writer = new FileWriter("movie.txt");
-            BufferedWriter bufferedWriter = new BufferedWriter(writer);
-            for (Movie movie: movieList) {
-				strDate = dateFormat.format(movie.getReleaseDate());  
-				bufferedWriter.write(movie.getId()+"-"+movie.getName()+"-"+strDate);
-	            bufferedWriter.newLine();
+			FileWriter writer = new FileWriter("movie.txt");
+			BufferedWriter bufferedWriter = new BufferedWriter(writer);
+			for (Movie movie : movieList) {
+				strDate = dateFormat.format(movie.getReleaseDate());
+				bufferedWriter.write(movie.getId() + "-" + movie.getName() + "-" + strDate);
+				bufferedWriter.newLine();
 			}
-            
-            bufferedWriter.close();
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+			bufferedWriter.close();
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
-	
-	public static boolean readMovieFile(){
-		
-		SimpleDateFormat formatter=new SimpleDateFormat("dd-M-yyyy hh:mm:ss");  
+
+	public static boolean readMovieFile() {
+
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
 		try {
-            FileReader reader = new FileReader("movie.txt");
-            BufferedReader bufferedReader = new BufferedReader(reader);
- 
-            String line;
-            
-            while ((line = bufferedReader.readLine()) != null) {
-            	Movie movie = new Movie();
-            	String[] arrOfStr = line.split("-", 3);
-            	  
-                for (int i = 0; i < arrOfStr.length; i++) {
-                	if (i == 0) {
-                		continue;
-                	}
+			FileReader reader = new FileReader("movie.txt");
+			BufferedReader bufferedReader = new BufferedReader(reader);
+
+			String line;
+
+			while ((line = bufferedReader.readLine()) != null) {
+				Movie movie = new Movie();
+				String[] arrOfStr = line.split("-", 3);
+
+				for (int i = 0; i < arrOfStr.length; i++) {
+					if (i == 0) {
+						continue;
+					}
 //                		movie.setId(Integer.parseInt(arrOfStr[i]));
-                	else if (i == 1)
-                		movie.setName(arrOfStr[i]);
-                	else {
-                		Date date = formatter.parse(arrOfStr[i]);
-                		movie.setReleaseDate(date);
-                	}
-                }
-                movieList.add(movie);
-            }
-            bufferedReader.close();
-            reader.close();
-            return true;
- 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+					else if (i == 1)
+						movie.setName(arrOfStr[i]);
+					else {
+						Date date = formatter.parse(arrOfStr[i]);
+						movie.setReleaseDate(date);
+					}
+				}
+				movieList.add(movie);
+			}
+			bufferedReader.close();
+			reader.close();
+			return true;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
 	}
-	
+
 	public static void addMoviesList() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter movie name: ");
@@ -237,7 +271,7 @@ public class TicketBookingEX {
 		movieList.add(movie);
 		TicketBookingEX.saveMovieFile();
 	}
-	
+
 	public static void editMoviesList() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter index: ");
@@ -260,7 +294,7 @@ public class TicketBookingEX {
 		}
 		TicketBookingEX.saveMovieFile();
 	}
-	
+
 	public static void removeMoviesList() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter index: ");
@@ -268,7 +302,7 @@ public class TicketBookingEX {
 		movieList.remove(index);
 		TicketBookingEX.saveMovieFile();
 	}
-	
+
 	public static void addTicketsList() {
 		Movie findMovie = new Movie();
 		Scanner sc = new Scanner(System.in);
@@ -284,8 +318,7 @@ public class TicketBookingEX {
 		}
 		if (checkExist == false) {
 			System.out.println("Can't add ticket because there is no movie has name " + name);
-		}
-		else {
+		} else {
 			System.out.println("Enter price: ");
 			Double price = sc.nextDouble();
 			Ticket ticket = new Ticket(findMovie, price);
@@ -293,7 +326,7 @@ public class TicketBookingEX {
 			TicketBookingEX.saveTicketFile();
 		}
 	}
-	
+
 	public static void editTicketsList() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter index: ");
@@ -304,7 +337,7 @@ public class TicketBookingEX {
 		ticket.setPrice(price);
 		TicketBookingEX.saveTicketFile();
 	}
-	
+
 	public static void removeTicketsList() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter index: ");
@@ -312,6 +345,4 @@ public class TicketBookingEX {
 		ticketList.remove(index);
 		TicketBookingEX.saveTicketFile();
 	}
-	
-	public static void
 }
